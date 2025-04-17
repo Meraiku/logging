@@ -79,11 +79,12 @@ type Logstash struct {
 
 type LoggerOption func(*LoggerOptions)
 
-func WithLevel(level Level) LoggerOption {
+// WithLevel sets the logging level for the logger. Default is LevelInfo.
+func WithLevel(level string) LoggerOption {
 	return func(o *LoggerOptions) {
 		var l Level
 
-		if err := l.UnmarshalText([]byte(level.String())); err != nil {
+		if err := l.UnmarshalText([]byte(level)); err != nil {
 			l = LevelInfo
 		}
 
@@ -91,24 +92,28 @@ func WithLevel(level Level) LoggerOption {
 	}
 }
 
+// WithJSON sets whether the logger should output JSON-formatted logs.
 func WithJSON(isJSON bool) LoggerOption {
 	return func(o *LoggerOptions) {
 		o.IsJSON = isJSON
 	}
 }
 
+// WithSource sets whether the logger should include source information.
 func WithSource(addSource bool) LoggerOption {
 	return func(o *LoggerOptions) {
 		o.AddSource = addSource
 	}
 }
 
+// WithSetDefault sets whether the logger should be set as the default logger.
 func WithSetDefault(setDefault bool) LoggerOption {
 	return func(o *LoggerOptions) {
 		o.SetDefault = setDefault
 	}
 }
 
+// WithLogstash sets whether the logger should send logs to Logstash.
 func WithLogstash(enable bool, logstashAddress string) LoggerOption {
 	return func(o *LoggerOptions) {
 		logstash := Logstash{
@@ -119,6 +124,7 @@ func WithLogstash(enable bool, logstashAddress string) LoggerOption {
 	}
 }
 
+// WithAttrs sets attributes for the logger.
 func WithAttrs(ctx context.Context, attrs ...Attr) *Logger {
 	logger := L(ctx)
 
@@ -129,6 +135,7 @@ func WithAttrs(ctx context.Context, attrs ...Attr) *Logger {
 	return logger
 }
 
+// WithDefaultAttrs sets default attributes for the logger.
 func WithDefaultAttrs(logger *Logger, attrs ...Attr) *Logger {
 
 	for _, attr := range attrs {
@@ -138,10 +145,12 @@ func WithDefaultAttrs(logger *Logger, attrs ...Attr) *Logger {
 	return logger
 }
 
+// L returns a logger from the context.
 func L(ctx context.Context) *Logger {
 	return loggerFromContext(ctx)
 }
 
+// Default returns the default logger.
 func Default() *Logger {
 	return slog.Default()
 }
